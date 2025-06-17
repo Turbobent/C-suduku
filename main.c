@@ -3,6 +3,54 @@
 #include <time.h>
 
 #define N 9
+int isSafe(int grid[N][N], int row, int col, int num);
+
+void shuffle(int *array, int size){
+    for (int i = size - 1; i > 0; i--) {
+        int j = rand() % (i+1);
+        int temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+int fillGrid(int grid[N][N], int row, int col) {
+    if (row == N - 1 && col == N)
+        return 1;
+
+    if (col == N) {
+        row++;
+        col = 0;
+    }
+
+    if (grid[row][col] > 0)
+        return fillGrid(grid, row, col + 1);
+
+    int nums[N];
+    for (int i = 0; i < N; i++) nums[i] = i + 1;
+    shuffle(nums, N);
+
+    for (int i = 0; i < N; i++) {
+        int num = nums[i];
+        if (isSafe(grid, row, col, num)) {
+            grid[row][col] = num;
+            if (fillGrid(grid, row, col + 1))
+                return 1;
+            grid[row][col] = 0;
+        }
+    }
+
+    return 0;
+}
+
+void generateValidGrid(int grid[N][N]) {
+    // Initialize empty grid
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            grid[i][j] = 0;
+
+    fillGrid(grid, 0, 0);
+}
 
 /*print grid */
 void print(int arr[N][N])
@@ -42,54 +90,15 @@ int isSafe(int grid[N][N], int row, int col, int num)
     return 1;
 }
 
-int solveSudoku(int grid[N][N], int row, int col)
-{
-    if (row == N - 1 && col == N)
-        return 1;
+int main() {
+    // Seed randomness for shuffle
+    srand(time(NULL)); 
 
-    if (col == N) {
-        row++;
-        col = 0;
-    }
+    int grid[N][N];
+    generateValidGrid(grid);
 
-    if (grid[row][col] > 0)
-        return solveSudoku(grid, row, col + 1);
-
-    for (int num = 1; num <= N; num++) {
-
-        if (isSafe(grid, row, col, num) == 1) {
-       
-            grid[row][col] = num;
-
-         
-            if (solveSudoku(grid, row, col + 1) == 1)
-                return 1;
-        }
-
-        grid[row][col] = 0;
-    }
-    return 0;
-}
-
-int generateValidGrid(){
-
-}
-
-int main(){
-    int grid[N][N] = { { 5, 3, 0, 0, 7, 0, 0, 0, 0 },
-                       { 6, 0, 0, 1, 9, 5, 0, 0, 0 },
-                       { 0, 9, 8, 0, 0, 0, 0, 6, 0 },
-                       { 8, 0, 0, 0, 6, 0, 0, 0, 3 },
-                       { 4, 0, 0, 8, 0, 3, 0, 0, 1 },
-                       { 7, 0, 0, 0, 2, 0, 0, 0, 6 },
-                       { 0, 6, 0, 0, 0, 0, 2, 8, 0 },
-                       { 0, 0, 0, 4, 1, 9, 0, 0, 5 },
-                       { 0, 0, 0, 0, 8, 0, 0, 7, 9 } };
-
-    if (solveSudoku(grid, 0, 0) == 1)
-        print(grid);
-    else
-        printf("No solution exists");
+    printf("Generated valid Sudoku grid:\n");
+    print(grid);
 
     return 0;
 }
